@@ -1,0 +1,11 @@
+.movies {
+    color: red;
+    position: relative;
+    padding-top: 10px; 
+    padding-left: 150px;
+    width: 80%;
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+}

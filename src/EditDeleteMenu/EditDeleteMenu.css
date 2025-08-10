@@ -1,0 +1,31 @@
+.edit-delete-menue {
+    position: relative;
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    align-items: right;
+    justify-content: start;
+    width: 150px;
+    padding: 5px;
+    margin-left: 80px;
+    margin-top: 10px;
+}
+
+.edit-delete-menue div {
+    margin-right: 5px; 
+    margin-left: 5px; 
+    padding: 5px;
+}
+
+.edit-delete-menue a {
+    color: white;
+    text-decoration: none;
+}
+
+.edit-delete-menue div:hover {
+  background-color: #F65261;
+}
+
+.edit-delete-menue a span:hover {
+  background-color: #F65261;
+}

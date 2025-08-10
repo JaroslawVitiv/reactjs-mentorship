@@ -1,0 +1,23 @@
+.delete-modal {
+    color: white;
+    margin: 100px;
+    display: flex;
+    flex-direction: column;
+}
+
+.delete-modal span {
+    text-transform: uppercase;
+    font-size: xx-large;
+    margin: 5px;
+}
+
+.delete-modal button {
+    text-transform: uppercase;
+    font-size: x-large;
+    background-color: #F65261;
+    color: white;
+    padding: 10px;
+    width: 200px;
+    margin: 50px;
+    margin-left: 500px;
+}

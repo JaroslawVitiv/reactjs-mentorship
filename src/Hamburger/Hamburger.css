@@ -1,0 +1,41 @@
+.menu-hamburger {
+    position: relative;
+    top: 10px;
+    left: 200px;
+    width: 40px;
+    height: 40px;
+    background-color: #000;
+    border-radius: 50%;
+    opacity: 1;
+    z-index: 1;
+}
+
+.menu-hamburger .first-dot {
+    position: relative;
+    top: 7px;
+    left: 19px;
+    width: 5px;
+    height: 5px;
+    background-color: #fff;
+    border-radius: 50%;
+}
+
+.menu-hamburger .second-dot {
+    position: relative;
+    top: 12px;
+    left: 19px;
+    width: 5px;
+    height: 5px;
+    background-color: #fff;
+    border-radius: 50%;
+}
+
+.menu-hamburger .third-dot {
+    position: relative;
+    top: 17px;
+    left: 19px;
+    width: 5px;
+    height: 5px;
+    background-color: #fff;
+    border-radius: 50%;
+}
