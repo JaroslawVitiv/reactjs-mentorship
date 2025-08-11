@@ -1,0 +1,16 @@
+.App-container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  background-color: #555;
+  background-size: cover;
+  background-attachment: fixed;
+  height: 100%;
+  padding-left: 100px;
+}
+
+.App-container .body {
+  background-color: #232323;
+  width: 90%;
+}

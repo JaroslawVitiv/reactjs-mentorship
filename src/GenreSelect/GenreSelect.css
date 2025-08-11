@@ -1,0 +1,64 @@
+.categories ul {
+  position: relative;
+  list-style-type: none;
+  margin-top: 10px;
+  margin-left: 150px;
+  padding: 0;
+  overflow: hidden;
+  text-transform: uppercase;
+  width: 70%;
+  color: #fff;
+}
+
+.categories li {
+  float: left;
+}
+
+.categories li a {
+  display: block;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.categories li a:hover:not(.active) {
+  border-bottom: 4px solid #F65261;
+}
+
+.categories li a.active {
+  background-color: #04AA6D;
+  border-bottom: 4px solid #F65261;
+}
+
+.categories li span {
+    color: #666;
+    padding-right: 15px;
+}
+
+.categories .dropdown {
+  float: right;
+  color: #fff;
+}
+
+.categories .dropdown .dropdown-menu {
+  display: none;
+  position: absolute;
+  color: #fff;
+}
+
+.categories .dropdown:hover .dropdown-menu {
+  display: block;
+  color: #fff;
+}
+
+/* Styles for the active NavLink */
+.active-link {
+  color: white;
+  border-bottom: 4px solid #F65261;
+}
+
+/* Styles for all other (inactive) NavLinks */
+.inactive-link {
+  color: white;
+  border-bottom: 4px solid #555;
+}

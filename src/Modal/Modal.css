@@ -1,0 +1,16 @@
+.modal {
+    position: fixed;
+    background-color: #232323;
+    z-index: 1;
+    width: 80%;
+    height: auto;
+    margin: 20px;
+}
+
+.modal a {
+    position: absolute;
+    top: 5px; 
+    right: 10px;
+    margin: 10px;
+    color: white;
+}
