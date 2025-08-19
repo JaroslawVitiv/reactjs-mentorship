@@ -1,7 +1,7 @@
 import './SearchForm.css';
 import React, {useState} from 'react';
 
-function SearchForm({findSeachBy}) {
+function SearchForm({findSearchBy}) {
   const [inputValue, setInputValue] = useState('');
 
   const handleInputChange = (e) => {
@@ -9,7 +9,7 @@ function SearchForm({findSeachBy}) {
   };
 
   const setSearch = (searchBy) => {
-    findSeachBy(searchBy); 
+    findSearchBy(searchBy);
   };
 
   return (
