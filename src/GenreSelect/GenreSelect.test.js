@@ -1,128 +1,154 @@
+// Jest test file: GenreSelect.test.jsx
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { TextEncoder, TextDecoder } from 'util';
-import GenreSelect from './GenreSelect'; // Adjust the import path as needed
+import GenreSelect from './GenreSelect';
 
-const renderWithRouter = (ui, { route = '/' } = {}) => {
-  window.history.pushState({}, 'Test page', route);
-  return render(ui, { wrapper: BrowserRouter });
-};
-
-beforeAll(() => {
-  global.TextEncoder = TextEncoder;
-  global.TextDecoder = TextDecoder;
-});
+// Mock the SortControl component to isolate the GenreSelect component's behavior
+// We only need to check if the props are passed correctly and if the component is rendered.
+jest.mock('../SortControl/SortControl', () => (props) => (
+  <div data-testid="sort-control">
+    {/* Simulate a click on the sort control to test its behavior */}
+    <button onClick={() => props.handleSortingBySetting('release_date')}>
+      Sort by Date
+    </button>
+  </div>
+));
 
 describe('GenreSelect', () => {
+  // Mock the prop functions to check if they are called correctly
   const mockGetCategorySortBy = jest.fn();
   const mockGetCategoryGenres = jest.fn();
 
-  test('renders with default genre "all" active and "title" as default sort', () => {
-    renderWithRouter(
-      <GenreSelect
-        getCategorySortBy={mockGetCategorySortBy}
-        getCategoryGenres={mockGetCategoryGenres}
-      />
+  // Helper function to render the component with a router
+  const renderComponent = () => {
+    return render(
+      <BrowserRouter>
+        <GenreSelect
+          getCategorySortBy={mockGetCategorySortBy}
+          getCategoryGenres={mockGetCategoryGenres}
+        />
+      </BrowserRouter>
     );
+  };
 
-    const allLink = screen.getByRole('link', { name: /all/i });
-    expect(allLink).toHaveClass('active-link');
-    
-    const documentaryLink = screen.getByRole('link', { name: /documentary/i });
-    expect(documentaryLink).toHaveClass('inactive-link');
-
-    const sortByDisplay = screen.getByText(/title/i);
-    expect(sortByDisplay).toBeInTheDocument();
+  // Reset mocks before each test to ensure a clean state
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  test('toggles the sort-by dropdown when clicked', () => {
-    renderWithRouter(
-      <GenreSelect
-        getCategorySortBy={mockGetCategorySortBy}
-        getCategoryGenres={mockGetCategoryGenres}
-      />
-    );
-
-    const dropdownButton = screen.getByText('sort by');
-    fireEvent.click(dropdownButton);
-
-    expect(screen.getByText(/vote count/i)).toBeInTheDocument();
-    expect(screen.getByText(/release date/i)).toBeInTheDocument();
-    
-    fireEvent.click(dropdownButton);
-
-    expect(screen.queryByText(/vote count/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/release date/i)).not.toBeInTheDocument();
+  // --- Initial Render and State Tests ---
+  it('should render the component and all genre links', () => {
+    renderComponent();
+    expect(screen.getByText(/all/i)).toBeInTheDocument();
+    expect(screen.getByText(/documentary/i)).toBeInTheDocument();
+    expect(screen.getByText(/comedy/i)).toBeInTheDocument();
+    expect(screen.getByText(/horror/i)).toBeInTheDocument();
+    expect(screen.getByText(/crime/i)).toBeInTheDocument();
+    expect(screen.getByText(/drama/i)).toBeInTheDocument();
+    expect(screen.getByTestId('sort-control')).toBeInTheDocument();
   });
 
-  test('selects and deselects a genre correctly', () => {
-    renderWithRouter(
-      <GenreSelect
-        getCategorySortBy={mockGetCategorySortBy}
-        getCategoryGenres={mockGetCategoryGenres}
-      />
-    );
-
-    const comedyLink = screen.getByRole('link', { name: /comedy/i });
-    const allLink = screen.getByRole('link', { name: /all/i });
-
-    expect(comedyLink).toHaveClass('inactive-link');
-    expect(allLink).toHaveClass('active-link');
-    
-    fireEvent.click(comedyLink);
-
-    expect(comedyLink).toHaveClass('active-link');
-    expect(allLink).toHaveClass('inactive-link');
-    expect(mockGetCategoryGenres).toHaveBeenCalledWith(['comedy']);
-
-    fireEvent.click(comedyLink);
-
-    expect(comedyLink).toHaveClass('inactive-link');
-    expect(allLink).toHaveClass('active-link'); // "all" should be active again because genres are now empty
-    expect(mockGetCategoryGenres).toHaveBeenCalledWith([]);
+  it('should have the "all" link as active by default', () => {
+    renderComponent();
+    expect(screen.getByText(/all/i)).toHaveClass('active-link');
   });
 
-  test('handles "all" genre selection to clear genres', () => {
-    renderWithRouter(
-      <GenreSelect
-        getCategorySortBy={mockGetCategorySortBy}
-        getCategoryGenres={mockGetCategoryGenres}
-      />
-    );
-    
-    const comedyLink = screen.getByRole('link', { name: /comedy/i });
-    const allLink = screen.getByRole('link', { name: /all/i });
-
-    fireEvent.click(comedyLink);
-    expect(mockGetCategoryGenres).toHaveBeenCalledWith(['comedy']);
-    
-    fireEvent.click(allLink);
-    
-    expect(allLink).toHaveClass('active-link');
-    expect(comedyLink).toHaveClass('inactive-link');
-    expect(mockGetCategoryGenres).toHaveBeenCalledWith([]);
+  it('should have all other genre links as inactive by default', () => {
+    renderComponent();
+    expect(screen.getByText(/documentary/i)).toHaveClass('inactive-link');
+    expect(screen.getByText(/comedy/i)).toHaveClass('inactive-link');
+    expect(screen.getByText(/horror/i)).toHaveClass('inactive-link');
+    expect(screen.getByText(/crime/i)).toHaveClass('inactive-link');
+    expect(screen.getByText(/drama/i)).toHaveClass('inactive-link');
   });
 
-  test('handles sort-by option selection', () => {
-    renderWithRouter(
-      <GenreSelect
-        getCategorySortBy={mockGetCategorySortBy}
-        getCategoryGenres={mockGetCategoryGenres}
-      />
-    );
+  // --- Genre Selection and Deselection Tests ---
+  it('should select a genre and call the prop function with the selected genre', async () => {
+    renderComponent();
 
-    const dropdownButton = screen.getByText('sort by');
-    fireEvent.click(dropdownButton); // Open dropdown
+    // Click on the 'documentary' link
+    fireEvent.click(screen.getByText(/documentary/i));
 
-    const voteCountOption = screen.getByText(/vote count/i);
-    fireEvent.click(voteCountOption); // Select "vote count"
+    // Wait for the state to update and the prop function to be called
+    await waitFor(() => {
+      expect(mockGetCategoryGenres).toHaveBeenCalledWith(['documentary']);
+    });
 
-    const sortByDisplay = screen.getByText(/vote count/i);
-    expect(sortByDisplay).toBeInTheDocument();
-    
-    expect(mockGetCategorySortBy).toHaveBeenCalledWith('vote_count');
+    // Verify that the 'documentary' link is now active
+    expect(screen.getByText(/documentary/i)).toHaveClass('active-link');
+    // Verify that the 'all' link is now inactive
+    expect(screen.getByText(/all/i)).toHaveClass('inactive-link');
+  });
 
-    expect(screen.queryByText(/release date/i)).not.toBeInTheDocument();
+  it('should deselect a genre on a second click', async () => {
+    renderComponent();
+
+    // Select the 'comedy' genre
+    fireEvent.click(screen.getByText(/comedy/i));
+    await waitFor(() => {
+      expect(mockGetCategoryGenres).toHaveBeenCalledWith(['comedy']);
+    });
+
+    // Deselect the 'comedy' genre
+    fireEvent.click(screen.getByText(/comedy/i));
+    await waitFor(() => {
+      expect(mockGetCategoryGenres).toHaveBeenCalledWith([]);
+    });
+
+    // Verify the link is now inactive again
+    expect(screen.getByText(/comedy/i)).toHaveClass('inactive-link');
+    // Verify the 'all' link is now active again
+    expect(screen.getByText(/all/i)).toHaveClass('active-link');
+  });
+
+  it('should handle selecting multiple genres', async () => {
+    renderComponent();
+
+    // Select 'horror'
+    fireEvent.click(screen.getByText(/horror/i));
+    await waitFor(() => {
+      expect(mockGetCategoryGenres).toHaveBeenCalledWith(['horror']);
+    });
+    expect(screen.getByText(/horror/i)).toHaveClass('active-link');
+
+    // Select 'crime'
+    fireEvent.click(screen.getByText(/crime/i));
+    await waitFor(() => {
+      expect(mockGetCategoryGenres).toHaveBeenCalledWith(['horror', 'crime']);
+    });
+    expect(screen.getByText(/crime/i)).toHaveClass('active-link');
+  });
+
+  it('should reset genres and activate the "all" link when "all" is clicked', async () => {
+    renderComponent();
+
+    // First, select a genre to get out of the initial state
+    fireEvent.click(screen.getByText(/drama/i));
+    await waitFor(() => {
+      expect(mockGetCategoryGenres).toHaveBeenCalledWith(['drama']);
+    });
+
+    // Now, click the 'all' link
+    fireEvent.click(screen.getByText(/all/i));
+    await waitFor(() => {
+      expect(mockGetCategoryGenres).toHaveBeenCalledWith([]);
+    });
+
+    // Verify the 'all' link is active and 'drama' is inactive
+    expect(screen.getByText(/all/i)).toHaveClass('active-link');
+    expect(screen.getByText(/drama/i)).toHaveClass('inactive-link');
+  });
+
+  // --- Sorting Functionality Tests ---
+  it('should call the sort prop function when a sorting option is clicked', async () => {
+    renderComponent();
+
+    // The mock SortControl has a button that calls the prop function
+    const sortButton = screen.getByText('Sort by Date');
+    fireEvent.click(sortButton);
+
+    // Since the alert has been removed, we can directly assert the prop call
+    expect(mockGetCategorySortBy).toHaveBeenCalledWith('release_date');
   });
 });

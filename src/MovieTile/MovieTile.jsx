@@ -1,15 +1,15 @@
 import EditDeleteMenu from '../EditDeleteMenu/EditDeleteMenu';
 import Hamburger from '../Hamburger/Hamburger';
-import './Movie.css';
+import './MovieTile.css';
 import React, { useState } from 'react';
-import movieInfoSlice from '../MovieInfo/movieInfoSlice';
+import movieDetailsSlice from '../MovieDetails/movieDetailsSlice';
 import { useDispatch } from 'react-redux';
 
-function Movie({ item }) {
+function MovieTile({ item }) {
   const [opacity, setOpacity] = useState(1);
   const [isHamburgerVisibile, setIsHamburgerVisibile] = useState(false);
   const [isEditDeleteMenueVisible, setIsEditDeleteMenueVisible] = useState(false);
-  const {openMovieInfo} = movieInfoSlice.actions;
+  const { openMovieDetails } = movieDetailsSlice.actions;
   const dispatch = useDispatch();
 
   const getYear = (date) => {  
@@ -38,12 +38,12 @@ function Movie({ item }) {
   };
 
   const moreAboutMovie = (item) => {
-    dispatch(openMovieInfo(item));
+    dispatch(openMovieDetails(item));
   };
 
   return (
     <div 
-      className='movie'
+      className='movie-tile'
       onMouseOver={() => handleMouseOver(item.id)}
       onMouseOut={handleMouseOut}
       onClick={() => moreAboutMovie(item)}
@@ -68,4 +68,4 @@ function Movie({ item }) {
   );
 }
 
-export default Movie;
+export default MovieTile;

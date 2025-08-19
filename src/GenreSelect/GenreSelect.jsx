@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
 import '../GenreSelect/GenreSelect.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import { NavLink } from 'react-router-dom';
+import SortControl from '../SortControl/SortControl';
+
 
 function GenreSelect({ getCategorySortBy, getCategoryGenres }) {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [sortBy, setSortBy] = useState("title");
   const [genres, setGenres] = useState([]);
-
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
 
   const handSortBySetting = (sortBy) => {
     setSortBy(sortBy.replace(/_/g, " "));
@@ -86,20 +81,10 @@ function GenreSelect({ getCategorySortBy, getCategoryGenres }) {
               drama
           </NavLink>
         </li>
-
-        <li className="dropdown" onClick={toggleDropdown}>
-          <a>
-            <span>sort by</span> {sortBy}      
-            <FontAwesomeIcon icon={faCaretDown} style={{ color: '#F65261', padding: '5px' }} />
-          </a>
-          {isDropdownOpen && ( 
-            <>
-              <a onClick={() => handSortBySetting("vote_count")}>vote count</a>
-              <a onClick={() => handSortBySetting("title")}>title</a>
-              <a onClick={() => handSortBySetting("release_date")}>release date</a>
-            </>
-          )}
-        </li>
+        <SortControl 
+          handleSortingBySetting={handSortBySetting} 
+          sortBy={sortBy}
+         />
       </ul>
       </nav>
     </>  
