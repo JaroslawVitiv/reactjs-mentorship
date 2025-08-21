@@ -1,4 +1,4 @@
-.movie {
+.movie-tile {
     color: #afa2a2;
     margin: 30px;
     display: flex;
@@ -7,7 +7,7 @@
     justify-content: start;
 }
 
-.movie .title {
+.movie-tile .title {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -15,7 +15,7 @@
     margin-top: 10px;
 }
 
-.movie .title .year {
+.movie-tile .title .year {
     border-style: solid;
     border-color: #afa2a2;
     border-width: 0.5px;
@@ -24,7 +24,7 @@
     font-size: small;
 }
 
-.movie .genres {
+.movie-tile .genres {
     font-size: small;
     text-align: left;
 }

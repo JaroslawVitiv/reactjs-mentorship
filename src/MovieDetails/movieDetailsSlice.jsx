@@ -1,21 +1,21 @@
 import { configureStore, createSlice } from '@reduxjs/toolkit';
 
-const movieInfoSlice = createSlice({
-  name: 'movieInfo',
+const movieDetailsSlice = createSlice({
+  name: 'movieDetails',
   initialState: {
     isOpen: false,
     item: null,
   },
   reducers: {
-    openMovieInfo: (state, action) => {
+    openMovieDetails: (state, action) => {
       state.isOpen = true;
       state.item = action.payload;
     },
-    closeMovieInfo: (state) => {
+    closeMovieDetails: (state) => {
       state.isOpen = false;
       state.item = null;
     },
   },
 });
 
-export default movieInfoSlice;
+export default movieDetailsSlice;

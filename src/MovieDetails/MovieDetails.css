@@ -1,14 +1,14 @@
-.movie-info {
+.movie-details {
     background-color: #232323;
 }
 
-.movie-info a {
+.movie-details a {
     font-size: xx-large;
     margin-left: 95%;
     color: #F65261;
 }
 
-.movie-info .grid {
+.movie-details .grid {
     display: flex;
     flex-direction: row;
     padding: 50px;
@@ -16,22 +16,22 @@
     height: 300px;
 }
 
-.movie-info img {
+.movie-details img {
    height: 300px;
 }
 
-.movie-info .m-info {
+.movie-details .m-info {
     padding-left: 50px;
     text-align: start;
     font-size: x-large;
 }
 
-.movie-info .title {
+.movie-details .title {
     color: white;
     text-transform: uppercase;
 }
 
-.movie-info .title > span {
+.movie-details .title > span {
     padding: 10px;
     margin-left: 70px;
     border-radius: 50%;
@@ -39,25 +39,25 @@
     font-size: x-large;
 }
 
-.movie-info .genres{
+.movie-details .genres{
     color: #424242;
     font-size: smaller;
     margin-top: 30px;
 }
 
-.movie-info .time {
+.movie-details .time {
     color: #F65261;
     font-size: x-large;
     margin-top: 30px;
 }
 
-.movie-info .time > span {
+.movie-details .time > span {
     padding: 10px;
     margin-right: 70px;
     font-size: x-large;
 }
 
-.movie-info .overview{
+.movie-details .overview{
     color: #424242;
     font-size: x-large;
     margin-top: 30px;
