@@ -2,10 +2,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClose } from '@fortawesome/free-solid-svg-icons';
 import './Delete.css';
 import React, {useState} from 'react';
-import SuccessMessage from '../SuccessMessage/SuccessMessage'
+import SuccessMessage from '../SuccessMessage/SuccessMessage';
+import { useDispatch } from 'react-redux';
+import modalSlice from '../Modal/modalSlice';
 
 function Delete({ item }) {
   const [success, setSuccess] = useState(false);
+  const dispatch = useDispatch();
+  const {submitModal} = modalSlice.actions;
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,6 +26,7 @@ function Delete({ item }) {
         if (response.headers.get('Content-Length') > 0) {
           const result = await response.json();
         }
+        dispatch(submitModal());
         setSuccess(true);
       } else {
         const errorText = await response.text();
