@@ -113,7 +113,7 @@ function MovieForm({ item }) {
         <div className='container'>
           <label className='main-label' htmlFor='movie-url'>Movie URL</label>
           <input 
-            id='movie-url' // Add a unique ID
+            id='movie-url'
             value={movieData?.poster_path} 
             name='poster_path' 
             onChange={handleInputChange} 
@@ -132,6 +132,7 @@ function MovieForm({ item }) {
         <div className='container'>
           <label className='main-label'>Genre</label>
           <GenreDropdown item={item} getGenres={handleGenres} />
+          {statusMessage.includes('genres') && (<label className='main-label'>Pick at least one genre</label>)}
         </div>
         <div className='container'>
           <label className='main-label' htmlFor='runtime'>Runtime</label>
@@ -145,7 +146,7 @@ function MovieForm({ item }) {
         <div className="container overview">
         <label className='main-label' htmlFor='overview'>Overview</label>
         <textarea 
-          id='overview' // Add a unique ID
+          id='overview'
           value={movieData?.overview} 
           onChange={handleInputChange} 
           name='overview'

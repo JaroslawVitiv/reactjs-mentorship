@@ -1,19 +1,15 @@
-// src/MovieForm/MovieForm.stories.jsx
-
 import React from 'react';
 import { Provider } from 'react-redux';
 import { configureStore, createSlice } from '@reduxjs/toolkit';
 import { within, userEvent } from '@storybook/test';
 import MovieForm from './MovieForm';
 
-// Mock the GenreDropdown component
 const MockGenreDropdown = ({ item, getGenres }) => (
   <div style={{ border: '1px solid #ccc', padding: '8px', borderRadius: '4px' }}>
     Mock Genre Dropdown
   </div>
 );
 
-// Mock the SuccessMessage component
 const MockSuccessMessage = ({ type }) => (
   <div style={{ textAlign: 'center', padding: '20px', backgroundColor: '#e8f5e9', borderRadius: '5px' }}>
     <h2 style={{ color: '#2e7d32' }}>Success!</h2>
@@ -21,7 +17,6 @@ const MockSuccessMessage = ({ type }) => (
   </div>
 );
 
-// Create a mock Redux slice and store
 const mockModalSlice = createSlice({
   name: 'modal',
   initialState: {
@@ -64,10 +59,8 @@ export default {
 
 const Template = (args) => <MovieForm {...args} />;
 
-// Add a separate story for the success state
 const SuccessTemplate = (args) => <MockSuccessMessage {...args} />;
 
-// Override the component and render functions to use mocks for specific stories
 const withMockedDependencies = (Story, context) => {
   const { isSuccess = false } = context.args;
   
@@ -78,13 +71,9 @@ const withMockedDependencies = (Story, context) => {
   return <Story />;
 };
 
-// Replace the original component with a wrapper that uses our mocks
 const WrapperWithMocks = ({ item }) => {
-  // Use a state to manage the success message display in the story
   const [success, setSuccess] = React.useState(false);
   
-  // Here we're manually replacing the components with our mocks
-  // This is a simpler approach than complex jest.mock() and jest.spyOn() setups
   if (success) {
     return <MockSuccessMessage type={item ? 'updated' : 'added'} />;
   }
@@ -106,7 +95,6 @@ export const AddMovieForm = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     
-    // Simulate filling out the form
     await userEvent.type(canvas.getByLabelText(/Title/i), 'New Action Movie');
     await userEvent.type(canvas.getByLabelText(/Release date/i), '2024-05-15');
     await userEvent.type(canvas.getByLabelText(/Movie URL/i), 'http://example.com/poster.jpg');
@@ -114,7 +102,6 @@ export const AddMovieForm = {
     await userEvent.type(canvas.getByLabelText(/Runtime/i), '120');
     await userEvent.type(canvas.getByLabelText(/Overview/i), 'A thrilling new action film.');
 
-    // Click the submit button
     const submitButton = canvas.getByRole('button', { name: /Submit/i });
     await userEvent.click(submitButton);
   },

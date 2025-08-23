@@ -5,7 +5,6 @@ import MovieForm from './MovieForm';
 import { useDispatch } from 'react-redux';
 import modalSlice from '../Modal/modalSlice';
 
-// Mock all external dependencies
 jest.mock('react-redux', () => ({
   useDispatch: jest.fn(),
 }));
@@ -22,7 +21,6 @@ jest.mock('../SuccessMessage/SuccessMessage', () => {
   };
 });
 
-// Mock the global fetch function
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
@@ -36,7 +34,6 @@ describe('MovieForm', () => {
     modalSlice.actions.submitModal = mockSubmitModal;
   });
 
-  // --- Rendering Tests ---
   it('should render the form with "Add movie" title for new movie', () => {
     render(<MovieForm item={null} />);
     expect(screen.getByText('Add movie')).toBeInTheDocument();
@@ -67,7 +64,6 @@ describe('MovieForm', () => {
     expect(screen.getByLabelText(/Overview/i)).toHaveValue('A hacker learns the truth about reality.');
   });
 
-  // --- Input Change and State Tests ---
   it('should update state on input change', () => {
     render(<MovieForm item={null} />);
     const titleInput = screen.getByLabelText(/Title/i);
@@ -75,7 +71,6 @@ describe('MovieForm', () => {
     expect(titleInput).toHaveValue('New Movie Title');
   });
 
-  // --- Reset Functionality Tests ---
   it('should reset the form to empty values when "Reset" is clicked for a new movie', () => {
     render(<MovieForm item={null} />);
     const titleInput = screen.getByLabelText(/Title/i);
@@ -99,7 +94,6 @@ describe('MovieForm', () => {
     expect(titleInput).toHaveValue('The Matrix');
   });
 
-  // --- Form Submission (API) Tests ---
   it('should make a POST request on submit for a new movie', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -141,7 +135,6 @@ describe('MovieForm', () => {
     });
   });
 
-  // --- Success Message and Redux Dispatch Tests ---
   it('should display success message and dispatch on successful submission', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,

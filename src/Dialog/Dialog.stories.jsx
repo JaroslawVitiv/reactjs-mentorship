@@ -1,5 +1,3 @@
-// src/Dialog/Dialog.stories.jsx
-
 import React from 'react';
 import Dialog from './Dialog';
 import { action } from '@storybook/addon-actions';
@@ -7,7 +5,6 @@ import { within, userEvent } from '@storybook/test';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClose } from '@fortawesome/free-solid-svg-icons';
 
-// Mock the nested components by defining them as simple functional components
 const MockMovieForm = ({ item }) => (
   <div style={{ padding: '20px', border: '1px solid lightgray', borderRadius: '5px' }}>
     <h3>Mock Movie Form</h3>
@@ -23,9 +20,7 @@ const MockDelete = ({ item }) => (
   </div>
 );
 
-// Create a wrapper component to control which mock component is rendered
 const DialogWrapper = ({ item, ...args }) => {
-  // We're essentially re-creating the logic from the original Dialog component
   const content = item?.operation === 'delete' ? <MockDelete item={item} /> : <MockMovieForm item={item} />;
   
   if (!args.isOpen) {
@@ -44,8 +39,8 @@ const DialogWrapper = ({ item, ...args }) => {
 
 export default {
   title: 'Components/Dialog',
-  component: Dialog, // Still reference the original component for docs
-  render: (args) => <DialogWrapper {...args} />, // Use the wrapper to render the component
+  component: Dialog,
+  render: (args) => <DialogWrapper {...args} />,
   parameters: {
     layout: 'fullscreen',
   },
