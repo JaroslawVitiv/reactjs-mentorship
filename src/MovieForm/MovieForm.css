@@ -3,12 +3,12 @@
     margin: 20px;
 }
 
-.edit-modal span {
+.edit-modal .title {
     text-transform: uppercase;
     font-size: xx-large;
 }
 
-.edit-modal form {
+.edit-modal .main-form {
     display: grid;
     grid: 80px / auto auto;
     grid-template-columns: 2fr 1fr; 
@@ -16,25 +16,26 @@
     padding: 10px;
 }
 
-.edit-modal form div {
+.edit-modal .main-form .container {
     display: flex;
     flex-direction: column;
 }
 
-.edit-modal form label {
+.edit-modal .main-form .main-label {
     color: #F65261;
     text-transform: uppercase;
     font-size: medium;
     padding-bottom: 10px;
 }
 
-.edit-modal form input {
+.edit-modal .main-form input {
     font-size: medium;
     padding: 10px;
     background-color: #323232;
     color: white;
     border: none;
 }
+
 
 .overview {
     grid-column: 1 / span 2;
@@ -44,12 +45,12 @@
 
 .overview textarea {
     grid-column: 1 / span 3;
-    height: 200px;
     padding: 10px;
     background-color: #323232;
     color: white;
     border: none;
     font-size: x-large;
+    height: 300px;
 }
 
 .reset {
