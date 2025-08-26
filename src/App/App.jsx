@@ -6,7 +6,7 @@ import MoviesCount from '../MoviesCount/MoviesCount';
 import Movies from '../Movies/Movies';
 import Footer from '../Footer/Footer';
 import Counter from '../Counter';
-import { Provider } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import store from '../store';
 import Modal from '../Modal/Modal';
 
@@ -15,14 +15,12 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [backEndUrl, setBackEndUrl] = useState("http://localhost:4000/movies");
+  const { isSubmitted } = useSelector((state) => state.modal);
+
 
   useEffect(() => {
-    const fetchMovies = async () => {
       callBackEnd(backEndUrl);
-    };
-
-    fetchMovies();
-  }, []);
+  }, [isSubmitted]);
 
   const callBackEnd = async (url) => {
     try {
@@ -59,7 +57,7 @@ function App() {
 
 
   return (    
-    <Provider store={store}>
+    <>
       <Modal />
       <div className="App-container">
         <div>
@@ -75,7 +73,7 @@ function App() {
         </div>
         <div><Footer /></div>
       </div>
-    </Provider>
+    </>
   );
 }
 

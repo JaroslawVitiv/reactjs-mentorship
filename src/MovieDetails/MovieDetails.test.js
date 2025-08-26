@@ -13,10 +13,8 @@ describe('MovieDetails Component', () => {
   let store;
 
   beforeEach(() => {
-    store = mockStore({
-      // Add your initial Redux store state here (if needed)
-    });
-    store.dispatch = jest.fn(); // Mock the dispatch function
+    store = mockStore({});
+    store.dispatch = jest.fn();
   });
 
   it('renders the MovieDetails component correctly with item prop', () => {
