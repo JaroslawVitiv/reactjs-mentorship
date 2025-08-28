@@ -18,6 +18,7 @@ function MovieDetails({ item }) {
 
   return (
     <div className="movie-details">
+      <br/>
       <a role='link' onClick={close} aria-label="Close movie details" className="close-btn">
         <FontAwesomeIcon icon={faSearch} />
       </a>
