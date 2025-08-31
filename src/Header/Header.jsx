@@ -1,32 +1,43 @@
+import { Outlet, Link, useMatch, Route, Routes } from 'react-router-dom';
 import SearchForm from '../SearchForm/SearchForm';
 import './Header.css';
 import modalSlice from '../Modal/modalSlice';
 import MovieDetails from '../MovieDetails/MovieDetails';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
-
-function Header({ getSearchResult}) {
+function Header({ searchMovie }) {
   const dispatch = useDispatch();
-  const {openModal} = modalSlice.actions;
-  const { isOpen, item } = useSelector((state) => state.movieDetails);
-
-  const handleSearch = (searchBy) => {
-    getSearchResult(searchBy); 
-  };
+  const { openModal } = modalSlice.actions;
+  const isMovieRoute = useMatch('/movie/:movieId');
 
   const addMovie = () => {
     dispatch(openModal(null));
-  }
+  };
+
+  const searchMovies = (searchBy) => {
+    searchMovie(searchBy);
+  };
 
   return (
-    <div className="Header"> 
+    <div className="Header">
       <span className="Header-title">
-        <strong>netflix</strong>roulette
+        <Link to="/">
+          <strong>netflix</strong>roulette
+        </Link>
       </span>
-      {!!item ? (<><MovieDetails item={item} /></>)
-      :
-      (<><button className='add-movie-button' onClick={addMovie}> + add movie </button>
-      <SearchForm findSeachBy={handleSearch} /></>)}
+      {isMovieRoute ? (
+        <Routes>
+          <Route path="/movie/:movieId" element={<MovieDetails />} />
+        </Routes>
+      ) : (
+        <>
+          <button className='add-movie-button' onClick={addMovie}>
+            + add movie
+          </button>
+          <SearchForm searchMovies={searchMovies} />
+        </>
+      )}
+      <Outlet />
     </div>
   );
 }

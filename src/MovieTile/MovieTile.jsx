@@ -2,23 +2,20 @@ import EditDeleteMenu from '../EditDeleteMenu/EditDeleteMenu';
 import Hamburger from '../Hamburger/Hamburger';
 import './MovieTile.css';
 import React, { useState } from 'react';
-import movieDetailsSlice from '../MovieDetails/movieDetailsSlice';
-import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 function MovieTile({ item }) {
   const [opacity, setOpacity] = useState(1);
   const [isHamburgerVisibile, setIsHamburgerVisibile] = useState(false);
   const [isEditDeleteMenueVisible, setIsEditDeleteMenueVisible] = useState(false);
-  const { openMovieDetails } = movieDetailsSlice.actions;
-  const dispatch = useDispatch();
 
-  const getYear = (date) => {  
-      return date ? date.slice(0, 4) : 0;
-  }
+  const getYear = (date) => {
+    return date ? date.slice(0, 4) : 0;
+  };
 
-   const handleMouseOver = () => {
+  const handleMouseOver = () => {
     setOpacity(0.5);
-    if(!isEditDeleteMenueVisible) {
+    if (!isEditDeleteMenueVisible) {
       setIsHamburgerVisibile(true);
     }
   };
@@ -37,31 +34,31 @@ function MovieTile({ item }) {
     setIsEditDeleteMenueVisible(!isEditDeleteMenuClosed);
   };
 
-  const moreAboutMovie = (item) => {
-    dispatch(openMovieDetails(item));
-  };
-
   return (
-    <div 
+    <div
       className='movie-tile'
-      onMouseOver={() => handleMouseOver(item.id)}
+      onMouseOver={handleMouseOver}
       onMouseOut={handleMouseOut}
-      onClick={() => moreAboutMovie(item)}
     >
-      <div style={{ opacity: opacity, backgroundImage: `url(${item.poster_path})`, backgroundSize: 'cover', width: '250px', height: '350px' }}>
-        {isHamburgerVisibile && (<Hamburger 
-          id={item.id}
-          handleHamburger={hambugerClick}
-        />)}
-        {isEditDeleteMenueVisible && (<EditDeleteMenu 
-          item={item}
-          handleCloseEditDeleteMenu={closeEditDeleteMenu}
-        />)}
-        
-      </div>      
+      <Link to={`/movie/${item.id}`} className="movie-tile-link" aria-label={item.title}>
+        <div style={{ opacity: opacity, backgroundImage: `url(${item.poster_path})`, backgroundSize: 'cover', width: '250px', height: '350px' }}>
+          {isHamburgerVisibile && (
+            <Hamburger
+              id={item.id}
+              handleHamburger={hambugerClick}
+            />
+          )}
+          {isEditDeleteMenueVisible && (
+            <EditDeleteMenu
+              item={item}
+              handleCloseEditDeleteMenu={closeEditDeleteMenu}
+            />
+          )}
+        </div>
+      </Link>
       <div className='title'>
         <div>{item.title}</div>
-        <div className='year' >{getYear(item.release_date)}</div>
+        <div className='year'>{getYear(item.release_date)}</div>
       </div>
       <div className='genres'>{item.genres.join(', ')}</div>
     </div>

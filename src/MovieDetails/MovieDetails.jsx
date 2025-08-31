@@ -1,20 +1,43 @@
 import './MovieDetails.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { useDispatch } from 'react-redux';
-import movieDetailsSlice from './movieDetailsSlice';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 
-function MovieDetails({ item }) {
-  const { openMovieDetails } = movieDetailsSlice.actions;
-  const dispatch = useDispatch();
+function MovieDetails() {
+  const [item, setItem] = useState(null);
+  const { movieId } = useParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if movieId exists before fetching
+    if (movieId) {
+      fetch(`http://localhost:4000/movies/${movieId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => setItem(data))
+        .catch(error => {
+          console.error("Could not fetch movie details:", error);
+          setItem(null);
+        });
+    }
+  }, [movieId]);
 
   const close = () => {
-    dispatch(openMovieDetails(null));
+    navigate('/');
   };
 
   const getYear = (date) => {
     return date ? date.slice(0, 4) : 0;
   };
+
+  if (!item) {
+    return <div>Loading movie details...</div>;
+  }
 
   return (
     <div className="movie-details">

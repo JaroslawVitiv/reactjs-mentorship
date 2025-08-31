@@ -93,7 +93,7 @@ function MovieForm({ item }) {
           <label className='main-label' htmlFor='title'>Title</label>
           <input 
             id='title'
-            value={movieData?.title} 
+            value={movieData?.title ?? ''}
             name="title" 
             onChange={handleInputChange} 
           />
