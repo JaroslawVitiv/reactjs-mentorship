@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom';
 import Header from '../Header/Header';
 import './App.css';
 import GenreSelect from '../GenreSelect/GenreSelect';
@@ -6,21 +7,32 @@ import MoviesCount from '../MoviesCount/MoviesCount';
 import Movies from '../Movies/Movies';
 import Footer from '../Footer/Footer';
 import Counter from '../Counter';
-import { Provider, useSelector } from 'react-redux';
-import store from '../store';
+import { useSelector } from 'react-redux';
 import Modal from '../Modal/Modal';
 
 function App() {
   const [movies, setMovies] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [backEndUrl, setBackEndUrl] = useState("http://localhost:4000/movies");
   const { isSubmitted } = useSelector((state) => state.modal);
-
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [genres, setGenres] = useState([]);
+  const [toggle, setToggle] = useState(true);
 
   useEffect(() => {
-      callBackEnd(backEndUrl);
-  }, [isSubmitted]);
+    const params = Object.fromEntries(searchParams.entries());
+    const query = new URLSearchParams(params).toString();
+    const url = `http://localhost:4000/movies?${query}${getUrlQuery(genres)}`;
+    callBackEnd(url);
+  }, [searchParams, isSubmitted, toggle]);
+
+  function getUrlQuery(genres) {
+    if (!Array.isArray(genres) || genres.length === 0) {
+        console.error("Input must be a non-empty array of strings.");
+        return "";
+    }
+    return `&searchBy=genres&filter=${genres.join(',')}`;
+  }
 
   const callBackEnd = async (url) => {
     try {
@@ -35,37 +47,44 @@ function App() {
 
         const data = await response.json();
         setMovies(data);
-        setBackEndUrl(url);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
   }
-  
+
   const getSortBy = (sortBy) => {
-    callBackEnd('http://localhost:4000/movies?sortOrder=asc&sortBy=' + sortBy);
+    setSearchParams(prevParams => {
+      prevParams.set('sortBy', sortBy);
+      prevParams.set('sortOrder', 'asc');
+      return prevParams;
+    });
   };
 
   const getGenres = (genres) => {
-    genres.length > 0 ? callBackEnd('http://localhost:4000/movies?searchBy=genres&filter=' + genres.join(',')) : callBackEnd('http://localhost:4000/movies');
+    setToggle(!toggle);
+    setGenres(genres);
   };
 
   const searchMovie = (searchBy) => {
-    callBackEnd('http://localhost:4000/movies?search=' + searchBy);
+    setSearchParams(prevParams => {
+      prevParams.set('searchBy', 'title');
+      prevParams.set('search', searchBy);
+      return prevParams;
+    });
   };
 
-
-  return (    
+  return (
     <>
       <Modal />
       <div className="App-container">
         <div>
-          <Header getSearchResult={searchMovie} />
+          <Header searchMovie={searchMovie} />
         </div>
         <div><Counter /></div>
         <br/>
-        {loading && (<div>Loading movies...</div>)} 
+        {loading && (<div>Loading movies...</div>)}
         <div className='body'>
           <div><GenreSelect getCategorySortBy={getSortBy} getCategoryGenres={getGenres} /></div>
           <div><MoviesCount moviesCount={movies?.totalAmount} /></div>
@@ -78,4 +97,3 @@ function App() {
 }
 
 export default App;
-

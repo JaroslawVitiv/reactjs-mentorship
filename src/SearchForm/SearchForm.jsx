@@ -1,29 +1,37 @@
 import './SearchForm.css';
 import React, {useState} from 'react';
+import { useSearchParams } from 'react-router-dom';
 
-function SearchForm({findSearchBy}) {
-  const [inputValue, setInputValue] = useState('');
+function SearchForm() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialSearchValue = searchParams.get('search') || '';
+  const [inputValue, setInputValue] = useState(initialSearchValue);
 
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
   };
 
-  const setSearch = (searchBy) => {
-    findSearchBy(searchBy);
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setSearchParams(prevParams => {
+      prevParams.set('searchBy', 'title');
+      prevParams.set('search', inputValue);
+      return prevParams;
+    });
   };
 
   return (
     <div className="Search">
       <p className='White-Capitals'>Find your movie</p>
-      <p>
-        <input 
+      <form onSubmit={handleSearch}>
+        <input
           value={inputValue}
-          onChange={handleInputChange} 
-          placeholder="What do you want to watch?" 
-          className="Search-bar" 
+          onChange={handleInputChange}
+          placeholder="What do you want to watch?"
+          className="Search-bar"
         />
-        <button onClick={() => setSearch(inputValue)} className='Search-button'>search</button>
-      </p>
+        <button type="submit" className='Search-button'>search</button>
+      </form>
     </div>
   );
 }

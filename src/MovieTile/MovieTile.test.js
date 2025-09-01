@@ -1,155 +1,110 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import configureStore from 'redux-mock-store';
-import '@testing-library/jest-dom';
-
+import { render, screen, fireEvent } from '@testing-library/react';
 import MovieTile from './MovieTile';
+import { BrowserRouter as Router } from 'react-router-dom';
 
-jest.mock('../Hamburger/Hamburger', () => {
-  return function MockHamburger({ handleHamburger }) {
-    return (
-      <button 
-        data-testid="mock-hamburger" 
-        onClick={handleHamburger}
-      >
-        Mock Hamburger
-      </button>
-    );
-  };
-});
+jest.mock('../Hamburger/Hamburger', () => ({ handleHamburger }) => (
+  <div data-testid="hamburger-mock" onClick={handleHamburger}>
+    Hamburger
+  </div>
+));
+jest.mock('../EditDeleteMenu/EditDeleteMenu', () => ({ handleCloseEditDeleteMenu }) => (
+  <div data-testid="edit-delete-menu-mock" onClick={() => handleCloseEditDeleteMenu(true)}>
+    EditDeleteMenu
+  </div>
+));
 
-jest.mock('../EditDeleteMenu/EditDeleteMenu', () => {
-  return function MockEditDeleteMenu({ handleCloseEditDeleteMenu }) {
-    return (
-      <div data-testid="mock-edit-delete-menu">
-        <button onClick={() => handleCloseEditDeleteMenu(true)}>Close Menu</button>
-      </div>
-    );
-  };
-});
-
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
-  useDispatch: jest.fn(),
-}));
-
-const mockStore = configureStore([]);
+const mockItem = {
+  id: 1,
+  title: 'Test Movie',
+  release_date: '2020-10-26T00:00:00.000Z',
+  genres: ['Comedy', 'Drama'],
+  poster_path: 'http://example.com/poster.jpg',
+};
 
 describe('MovieTile', () => {
-  const mockMovie = {
-    id: 1,
-    title: 'Pulp Fiction',
-    release_date: '1994-10-14',
-    genres: ['Crime', 'Drama'],
-    poster_path: 'https://example.com/pulp-fiction.jpg',
-  };
-
-  let store;
-  let mockDispatch;
-
-  beforeEach(() => {
-    mockDispatch = jest.fn();
-    require('react-redux').useDispatch.mockReturnValue(mockDispatch);
-
-    store = mockStore({});
-  });
-
-  test('renders correctly with movie data', () => {
+  test('renders with correct movie details', () => {
     render(
-      <Provider store={store}>
-        <MovieTile item={mockMovie} />
-      </Provider>
+      <Router>
+        <MovieTile item={mockItem} />
+      </Router>
     );
 
-    expect(screen.getByText('Pulp Fiction')).toBeInTheDocument();
-    expect(screen.getByText('1994')).toBeInTheDocument();
-    expect(screen.getByText('Crime, Drama')).toBeInTheDocument();
+    const linkElement = screen.getByRole('link', { name: /Test Movie/i });
+    expect(linkElement).toHaveAttribute('href', '/movie/1');
 
-    expect(screen.queryByTestId('mock-hamburger')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mock-edit-delete-menu')).not.toBeInTheDocument();
+    expect(screen.getByText('Test Movie')).toBeInTheDocument();
+    expect(screen.getByText('2020')).toBeInTheDocument();
+    expect(screen.getByText('Comedy, Drama')).toBeInTheDocument();
   });
 
-  test('shows hamburger menu on mouse over and hides it on mouse out', () => {
-    const { getByText, queryByTestId, getByTestId } = render(
-      <Provider store={store}>
-        <MovieTile item={mockMovie} />
-      </Provider>
+  test('changes opacity and shows hamburger on mouse over', () => {
+    render(
+      <Router>
+        <MovieTile item={mockItem} />
+      </Router>
     );
-    const movieTile = getByText('Pulp Fiction').closest('.movie-tile');
+
+    const movieTile = screen.getByText('Test Movie').closest('.movie-tile');
+    const backgroundDiv = movieTile.querySelector('div[style*="background-image"]');
     
+    expect(backgroundDiv).toHaveStyle('opacity: 1');
+    expect(screen.queryByTestId('hamburger-mock')).toBeNull();
+
     fireEvent.mouseOver(movieTile);
 
-    expect(getByTestId('mock-hamburger')).toBeInTheDocument();
+    expect(backgroundDiv).toHaveStyle('opacity: 0.5');
+    expect(screen.getByTestId('hamburger-mock')).toBeInTheDocument();
+  });
 
+  test('reverts opacity and hides hamburger on mouse out', () => {
+    render(
+      <Router>
+        <MovieTile item={mockItem} />
+      </Router>
+    );
+
+    const movieTile = screen.getByText('Test Movie').closest('.movie-tile');
+    const backgroundDiv = movieTile.querySelector('div[style*="background-image"]');
+
+    fireEvent.mouseOver(movieTile);
     fireEvent.mouseOut(movieTile);
-    
-    expect(queryByTestId('mock-hamburger')).not.toBeInTheDocument();
+
+    expect(backgroundDiv).toHaveStyle('opacity: 1');
+    expect(screen.queryByTestId('hamburger-mock')).toBeNull();
   });
 
-  test('clicking the hamburger button shows the edit/delete menu', async () => {
-    const { getByText, getByTestId, queryByTestId } = render(
-      <Provider store={store}>
-        <MovieTile item={mockMovie} />
-      </Provider>
+  test('hides hamburger and shows edit/delete menu on hamburger click', () => {
+    render(
+      <Router>
+        <MovieTile item={mockItem} />
+      </Router>
     );
-    const movieTile = getByText('Pulp Fiction').closest('.movie-tile');
 
+    const movieTile = screen.getByText('Test Movie').closest('.movie-tile');
     fireEvent.mouseOver(movieTile);
-
-    const hamburgerButton = getByTestId('mock-hamburger');
     
-    fireEvent.click(hamburgerButton);
+    const hamburger = screen.getByTestId('hamburger-mock');
+    fireEvent.click(hamburger);
 
-    await waitFor(() => {
-      expect(queryByTestId('mock-hamburger')).not.toBeInTheDocument();
-      expect(getByTestId('mock-edit-delete-menu')).toBeInTheDocument();
-    });
+    expect(screen.queryByTestId('hamburger-mock')).toBeNull();
+    expect(screen.getByTestId('edit-delete-menu-mock')).toBeInTheDocument();
   });
 
-  test('the edit/delete menu can be closed', async () => {
-    const { getByText, getByTestId, queryByTestId } = render(
-      <Provider store={store}>
-        <MovieTile item={mockMovie} />
-      </Provider>
+  test('hides edit/delete menu when close handler is called', () => {
+    render(
+      <Router>
+        <MovieTile item={mockItem} />
+      </Router>
     );
-    const movieTile = getByText('Pulp Fiction').closest('.movie-tile');
 
+    const movieTile = screen.getByText('Test Movie').closest('.movie-tile');
     fireEvent.mouseOver(movieTile);
-    fireEvent.click(getByTestId('mock-hamburger'));
-
-    const closeButton = getByText('Close Menu');
-
-    fireEvent.click(closeButton);
-
-    await waitFor(() => {
-      expect(queryByTestId('mock-edit-delete-menu')).not.toBeInTheDocument();
-    });
-  });
-
-  test('clicking the tile dispatches the openMovieDetails action', () => {
-    const { getByText } = render(
-      <Provider store={store}>
-        <MovieTile item={mockMovie} />
-      </Provider>
-    );
-    const movieTile = getByText('Pulp Fiction').closest('.movie-tile');
-
-    fireEvent.click(movieTile);
-
-    expect(mockDispatch).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByTestId('hamburger-mock'));
     
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'movieDetails/openMovieDetails',
-      payload: mockMovie,
-    });
-  });
+    const editDeleteMenu = screen.getByTestId('edit-delete-menu-mock');
+    fireEvent.click(editDeleteMenu);
 
-  test('getYear function returns the correct year', () => {
-    const getYear = (date) => (date ? date.slice(0, 4) : 0);
-    expect(getYear('2022-05-15')).toBe('2022');
-    expect(getYear(null)).toBe(0);
-    expect(getYear(undefined)).toBe(0);
-    expect(getYear('2022')).toBe('2022');
+    expect(screen.queryByTestId('edit-delete-menu-mock')).toBeNull();
   });
 });

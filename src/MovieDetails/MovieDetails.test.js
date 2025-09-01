@@ -1,78 +1,107 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import configureStore from 'redux-mock-store';
-import '@testing-library/jest-dom';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { useParams, useNavigate } from 'react-router-dom';
 import MovieDetails from './MovieDetails';
-import movieDetailsSlice from './movieDetailsSlice';
 
-const mockStore = configureStore([]);
-const { openMovieDetails } = movieDetailsSlice.actions;
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn(),
+  useNavigate: jest.fn(),
+}));
 
-describe('MovieDetails Component', () => {
-  let store;
+const mockMovie = {
+  id: 1,
+  title: 'Pulp Fiction',
+  vote_average: 8.9,
+  genres: ['Crime', 'Drama'],
+  release_date: '1994-05-21',
+  runtime: 154,
+  overview: 'The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.',
+  poster_path: 'https://image.tmdb.org/t/p/w500/d5iY7E5y0eB5q30Fq9o3n9L9tQ5.jpg',
+};
 
+describe('MovieDetails', () => {
   beforeEach(() => {
-    store = mockStore({});
-    store.dispatch = jest.fn();
+    jest.clearAllMocks();
+    useParams.mockReturnValue({ movieId: '1' });
+
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(mockMovie),
+      })
+    );
   });
 
-  it('renders the MovieDetails component correctly with item prop', () => {
-    const item = {
-      poster_path: '/path/to/poster.jpg',
-      title: 'Inception',
-      vote_average: 8.8,
-      genres: ['Action', 'Sci-Fi'],
-      release_date: '2010-07-16',
-      runtime: 148,
-      overview: 'A mind-bending journey through dreams.',
-    };
-
-    render(
-      <Provider store={store}>
-        <MovieDetails item={item} />
-      </Provider>,
-    );
-
-    expect(screen.getByRole('img', { name: /inception movie poster/i })).toHaveAttribute('src', '/path/to/poster.jpg');
-    expect(screen.getByText('Inception')).toBeInTheDocument();
-    expect(screen.getByText('8.8')).toBeInTheDocument();
-    expect(screen.getByText('Action, Sci-Fi')).toBeInTheDocument();
-    expect(screen.getByText('2010')).toBeInTheDocument();
-    expect(screen.getByText('148min')).toBeInTheDocument();
-    expect(screen.getByText('A mind-bending journey through dreams.')).toBeInTheDocument();
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
-  it('dispatches openMovieDetails with null when close button is clicked', () => {
-    const item = {
-      poster_path: '/path/to/poster.jpg',
-      title: 'Inception',
-    };
+  test('should render "Loading..." initially and then movie details after successful fetch', async () => {
+    render(<MovieDetails />);
+    
+    expect(screen.getByText('Loading movie details...')).toBeInTheDocument();
 
-    render(
-      <Provider store={store}>
-        <MovieDetails item={item} />
-      </Provider>,
-    );
+    const movieTitleElement = await screen.findByText(mockMovie.title);
 
-    fireEvent.click(screen.getByRole('link', { name: /close movie details/i }));
+    expect(movieTitleElement).toBeInTheDocument();
 
-    expect(store.dispatch).toHaveBeenCalledWith(openMovieDetails(null));
+    expect(screen.getByText(mockMovie.vote_average)).toBeInTheDocument();
+    expect(screen.getByText(mockMovie.genres.join(', '))).toBeInTheDocument();
+    expect(screen.getByText('1994')).toBeInTheDocument();
+    expect(screen.getByText(`${mockMovie.runtime}min`)).toBeInTheDocument();
+    expect(screen.getByText(mockMovie.overview)).toBeInTheDocument();
+    
+    const posterImage = screen.getByAltText(`${mockMovie.title} movie poster`);
+    expect(posterImage).toHaveAttribute('src', mockMovie.poster_path);
   });
 
-  it('handles missing data gracefully', () => {
-    const item = {
-      title: 'Unknown Movie',
-    };
+  test('should not call fetch if movieId is not present in params', () => {
+    useParams.mockReturnValue({ movieId: undefined });
+    render(<MovieDetails />);
 
-    render(
-      <Provider store={store}>
-        <MovieDetails item={item} />
-      </Provider>,
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(screen.getByText('Loading movie details...')).toBeInTheDocument();
+  });
+  
+  test('should handle a failed fetch and remain in loading state', async () => {
+    global.fetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: false,
+        status: 404,
+        json: () => Promise.resolve({}),
+      })
     );
+    
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    expect(screen.getByText('Unknown Movie')).toBeInTheDocument();
-    expect(screen.getByText('0')).toBeInTheDocument();
-    expect(screen.queryByRole('img')).not.toBeNull();
+    render(<MovieDetails />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Loading movie details...')).toBeInTheDocument();
+      expect(screen.queryByText(mockMovie.title)).toBeNull();
+    });
+    
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Could not fetch movie details:',
+      expect.any(Error)
+    );
+    
+    consoleErrorSpy.mockRestore();
+  });
+
+  test('should call navigate to "/" when the close button is clicked', async () => {
+    const mockNavigate = jest.fn();
+    useNavigate.mockReturnValue(mockNavigate);
+    
+    render(<MovieDetails />);
+    
+    await screen.findByText(mockMovie.title);
+
+    const closeButton = screen.getByRole('link', { name: 'Close movie details' });
+    
+    fireEvent.click(closeButton);
+    
+    expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 });
