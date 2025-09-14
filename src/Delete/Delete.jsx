@@ -1,5 +1,3 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClose } from '@fortawesome/free-solid-svg-icons';
 import './Delete.css';
 import React, {useState} from 'react';
 import SuccessMessage from '../SuccessMessage/SuccessMessage';
