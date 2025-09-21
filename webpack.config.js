@@ -14,7 +14,7 @@ const config = {
 
   // The entry point of your application.
   // Webpack starts bundling from this file.
-  entry: './src/index.ts',
+  entry: './src/index.tsx',
 
   // The output configuration tells Webpack where to emit the bundles.
   output: {
