@@ -1,4 +1,4 @@
-import { Outlet, Link, useMatch, Route, Routes } from 'react-router-dom';
+import { Link, useMatch, Route, Routes, useNavigate } from 'react-router-dom';
 import SearchForm from '../SearchForm/SearchForm';
 import './Header.css';
 import modalSlice from '../Modal/modalSlice';
@@ -12,10 +12,6 @@ function Header({ searchMovie }) {
 
   const addMovie = () => {
     dispatch(openModal(null));
-  };
-
-  const searchMovies = (searchBy) => {
-    searchMovie(searchBy);
   };
 
   return (
@@ -32,12 +28,11 @@ function Header({ searchMovie }) {
       ) : (
         <>
           <button className='add-movie-button' onClick={addMovie}>
-            + add movie
+            <Link to="/new">+ add movie</Link>
           </button>
-          <SearchForm searchMovies={searchMovies} />
+          <SearchForm />
         </>
       )}
-      <Outlet />
     </div>
   );
 }

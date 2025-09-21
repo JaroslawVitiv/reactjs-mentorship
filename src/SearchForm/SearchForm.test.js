@@ -1,75 +1,118 @@
+// SearchForm.test.jsx
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useSearchParams } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import SearchForm from './SearchForm';
 
-jest.mock('react-router-dom', () => ({
-  useSearchParams: jest.fn(),
-}));
+// Mock react-router-dom hooks
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+  const setSearchParamsMock = jest.fn();
+
+  return {
+    ...original,
+    useSearchParams: () => {
+      const urlParams = new URLSearchParams(global.window.location.search);
+      return [urlParams, setSearchParamsMock];
+    },
+    Outlet: () => <div data-testid="mock-outlet">Outlet content</div>,
+    __esModule: true,
+    __setSearchParamsMock: setSearchParamsMock,
+  };
+});
 
 describe('SearchForm', () => {
-  const mockSetSearchParams = jest.fn();
+  let setSearchParamsMock;
 
   beforeEach(() => {
+    // Access the mock from the module
+    setSearchParamsMock = require('react-router-dom').__setSearchParamsMock;
     jest.clearAllMocks();
-    useSearchParams.mockReturnValue([
-      new URLSearchParams(),
-      mockSetSearchParams,
-    ]);
+    window.history.pushState({}, '', '/'); // reset URL
   });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
+  test('renders correctly with default values', () => {
+    render(
+      <MemoryRouter>
+        <SearchForm />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText(/Find your movie/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/What do you want to watch?/i)).toHaveValue('');
+    expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument();
+    expect(screen.getByTestId('mock-outlet')).toBeInTheDocument();
   });
 
-  test('should render and initialize with an empty search value', () => {
-    render(<SearchForm />);
-    const searchInput = screen.getByPlaceholderText('What do you want to watch?');
-    expect(searchInput).toBeInTheDocument();
-    expect(searchInput.value).toBe('');
+  test('renders with initial search param', () => {
+    window.history.pushState({}, '', '/?search=matrix');
+
+    render(
+      <MemoryRouter>
+        <SearchForm />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByPlaceholderText(/What do you want to watch?/i)).toHaveValue('matrix');
   });
 
-  test('should initialize with a search value from URL parameters', () => {
-    useSearchParams.mockReturnValue([
-      new URLSearchParams('search=test%20movie'),
-      mockSetSearchParams,
-    ]);
-    render(<SearchForm />);
-    const searchInput = screen.getByPlaceholderText('What do you want to watch?');
-    expect(searchInput.value).toBe('test movie');
+  test('updates input value on typing', async () => {
+    render(
+      <MemoryRouter>
+        <SearchForm />
+      </MemoryRouter>
+    );
+
+    const input = screen.getByPlaceholderText(/What do you want to watch?/i);
+    await userEvent.type(input, 'inception');
+
+    expect(input).toHaveValue('inception');
   });
 
-  test('should update input value on user typing', async () => {
-    const user = userEvent.setup();
-    render(<SearchForm />);
-    const searchInput = screen.getByPlaceholderText('What do you want to watch?');
-    await user.type(searchInput, 'Inception');
-    expect(searchInput.value).toBe('Inception');
+  test('submits form and updates search params', async () => {
+    render(
+      <MemoryRouter>
+        <SearchForm />
+      </MemoryRouter>
+    );
+
+    const input = screen.getByPlaceholderText(/What do you want to watch?/i);
+    await userEvent.type(input, 'avatar');
+
+    const button = screen.getByRole('button', { name: /search/i });
+    await userEvent.click(button);
+
+    expect(setSearchParamsMock).toHaveBeenCalledTimes(1);
+
+    // Check callback behavior
+    const callback = setSearchParamsMock.mock.calls[0][0];
+    const params = new URLSearchParams();
+    const updatedParams = callback(params);
+
+    expect(updatedParams.get('search')).toBe('avatar');
+    expect(updatedParams.get('searchBy')).toBe('title');
   });
 
-  test('should call setSearchParams with correct values on form submission', async () => {
-    const user = userEvent.setup();
-    render(<SearchForm />);
-    const searchInput = screen.getByPlaceholderText('What do you want to watch?');
-    const searchButton = screen.getByRole('button', { name: /search/i });
+  test('submitting without typing keeps existing value', async () => {
+    window.history.pushState({}, '', '/?search=batman');
 
-    await user.type(searchInput, 'Interstellar');
-    fireEvent.click(searchButton);
+    render(
+      <MemoryRouter>
+        <SearchForm />
+      </MemoryRouter>
+    );
 
-    await waitFor(() => {
-      expect(mockSetSearchParams).toHaveBeenCalled();
-    });
+    const button = screen.getByRole('button', { name: /search/i });
+    await userEvent.click(button);
 
-    const expectedSearchParams = new URLSearchParams();
-    expectedSearchParams.set('searchBy', 'title');
-    expectedSearchParams.set('search', 'Interstellar');
+    expect(setSearchParamsMock).toHaveBeenCalledTimes(1);
 
-    expect(mockSetSearchParams).toHaveBeenCalledWith(expect.any(Function));
+    const callback = setSearchParamsMock.mock.calls[0][0];
+    const params = new URLSearchParams();
+    const updatedParams = callback(params);
 
-    const updateFunction = mockSetSearchParams.mock.calls[0][0];
-    const newParams = updateFunction(new URLSearchParams());
-    expect(newParams.get('searchBy')).toBe('title');
-    expect(newParams.get('search')).toBe('Interstellar');
+    expect(updatedParams.get('search')).toBe('batman');
+    expect(updatedParams.get('searchBy')).toBe('title');
   });
 });

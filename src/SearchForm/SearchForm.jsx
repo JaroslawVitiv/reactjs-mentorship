@@ -1,37 +1,44 @@
 import './SearchForm.css';
-import React, {useState} from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React from 'react';
+import { useSearchParams, Outlet } from 'react-router-dom';
+import { useFormik } from 'formik';
 
 function SearchForm() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearchValue = searchParams.get('search') || '';
-  const [inputValue, setInputValue] = useState(initialSearchValue);
 
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setSearchParams(prevParams => {
-      prevParams.set('searchBy', 'title');
-      prevParams.set('search', inputValue);
-      return prevParams;
-    });
-  };
+  const formik = useFormik({
+    initialValues: {
+      search: initialSearchValue,
+    },
+    onSubmit: values => {
+      setSearchParams(prevParams => {
+        prevParams.set('searchBy', 'title');
+        prevParams.set('search', values.search);
+        return prevParams;
+      });
+    },
+  });
 
   return (
     <div className="Search">
       <p className='White-Capitals'>Find your movie</p>
-      <form onSubmit={handleSearch}>
+      <form onSubmit={formik.handleSubmit}>
         <input
-          value={inputValue}
-          onChange={handleInputChange}
+          id="search"
+          name="search"
+          type="text"
+          onChange={formik.handleChange}
+          value={formik.values.search}
           placeholder="What do you want to watch?"
           className="Search-bar"
         />
         <button type="submit" className='Search-button'>search</button>
       </form>
+
+      {/* <div className="Search-results">
+        <Outlet />
+      </div> */}
     </div>
   );
 }
