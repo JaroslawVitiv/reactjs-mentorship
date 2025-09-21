@@ -1,6 +1,5 @@
 import { useSearchParams } from 'react-router-dom';
 import Header from '../Header/Header';
-import './App.css';
 import GenreSelect from '../GenreSelect/GenreSelect';
 import React, { useState, useEffect } from 'react';
 import MoviesCount from '../MoviesCount/MoviesCount';
@@ -9,6 +8,7 @@ import Footer from '../Footer/Footer';
 import Counter from '../Counter';
 import { useSelector } from 'react-redux';
 import Modal from '../Modal/Modal';
+import './App.css';
 
 function App() {
   const [movies, setMovies] = useState(null);
